@@ -6,7 +6,7 @@ import {
   GridHelper,
   SphereBufferGeometry,
   DoubleSide,
-} from "../../../three/build/three.module.js";
+} from "./three/build/three.module.js";
 
 const geometry = new PlaneGeometry(1000, 1000);
 geometry.rotateX(-Math.PI / 2);

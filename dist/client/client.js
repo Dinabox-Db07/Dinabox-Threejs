@@ -1,4 +1,4 @@
-import * as THREE from "../../three/build/three.module.js";
+import * as THREE from "./components/three/build/three.module.js";
 import { camera } from "./core/mainCamera.js";
 import { directionalLight, ambientLight } from "./core/sceneLights.js";
 import {
@@ -10,6 +10,7 @@ import {
 } from "./components/objects.js";
 import { controls } from "./core/controls.js";
 import { renderer } from "./core/renderer.js";
+
 // variables
 let scene,
   plane,
@@ -18,12 +19,13 @@ let raycaster,
   mouse,
   objects = [],
   isShiftDown = false;
+
 // starting function
 
 function init() {
   // scene
   scene = new THREE.Scene();
-  scene.name = "Projeto Ts";
+  scene.name = "Projeto Three";
   scene.background = new THREE.Color(0xf0f0f0);
 
   // grid
@@ -46,7 +48,7 @@ function init() {
   window.addEventListener("mousedown", onDocumentMouseDown);
   window.addEventListener("keydown", onDocumentKeyDown);
   window.addEventListener("keyup", onDocumentKeyUp);
-  window.addEventListener("keypress", onKeyPress);
+  window.addEventListener("keypress", onDocumentKeyPress);
 
   // window resize
   window.addEventListener("resize", onWindowResize, false);
@@ -89,6 +91,7 @@ function onDocumentMouseMove(evt) {
 
   render();
 }
+
 function onDocumentMouseDown(evt) {
   evt.preventDefault();
 
@@ -205,28 +208,26 @@ function onDocumentMouseDown(evt) {
       point2.position.copy(intersect.point).add(intersect.face.normal);
       point2.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
 
-      // add line function
-      addLine();
-
       //
       scene.add(point2);
       objects.push(point2);
 
       // count for creating the plane
-      if (count === 5) {
+      if (count === 4) {
         whenCompleteLine();
       }
 
       //
       count++;
     }
+    addLine();
     if (count <= -1) {
       count++;
     }
   }
 }
 
-function onKeyPress(evt) {
+function onDocumentKeyPress(evt) {
   switch (evt.keyCode) {
     case 49:
       controls.enabled = false;
