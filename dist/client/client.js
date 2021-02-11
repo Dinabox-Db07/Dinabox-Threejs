@@ -6,7 +6,7 @@ import {
   sphereMaterial,
   rollOverMesh,
   invPlane,
-  gridHelper,
+  grid,
 } from "./components/objects.js";
 import { controls } from "./core/controls.js";
 import { renderer } from "./core/renderer.js";
@@ -21,15 +21,14 @@ let raycaster,
   isShiftDown = false;
 
 // starting function
-
 function init() {
   // scene
   scene = new THREE.Scene();
   scene.name = "Projeto Three";
   scene.background = new THREE.Color(0xf0f0f0);
 
-  // grid
-  scene.add(gridHelper);
+  //grid
+  scene.add(grid);
 
   // raycaster(cursor)
   raycaster = new THREE.Raycaster();
@@ -43,21 +42,24 @@ function init() {
   // lights
   scene.add(ambientLight, directionalLight);
 
-  // listeners
+  // mouse listeners
   window.addEventListener("mousemove", onDocumentMouseMove);
   window.addEventListener("mousedown", onDocumentMouseDown);
+
+  // key listener
   window.addEventListener("keydown", onDocumentKeyDown);
   window.addEventListener("keyup", onDocumentKeyUp);
   window.addEventListener("keypress", onDocumentKeyPress);
 
   // window resize
   window.addEventListener("resize", onWindowResize, false);
+
+  //
   console.log(
     `Name: ${scene.name} \nUUID: ${scene.uuid} \nID: ${scene.id} \nType: ${scene.type} \nVisible: ${scene.visible}`
   );
 }
 
-// set X & Y
 function mouseSetXY(evt) {
   mouse.set(
     (evt.clientX / window.innerWidth) * 2 - 1,
@@ -68,11 +70,8 @@ function mouseSetXY(evt) {
 // mouse move
 function onDocumentMouseMove(evt) {
   evt.preventDefault();
-
-  // set X&Y
   mouseSetXY(evt);
 
-  // cursor
   raycaster.setFromCamera(mouse, camera);
 
   // intersect objects
@@ -94,8 +93,6 @@ function onDocumentMouseMove(evt) {
 
 function onDocumentMouseDown(evt) {
   evt.preventDefault();
-
-  // set X&Y
   mouseSetXY(evt);
 
   // raycaster
@@ -220,7 +217,9 @@ function onDocumentMouseDown(evt) {
       //
       count++;
     }
+
     addLine();
+
     if (count <= -1) {
       count++;
     }
@@ -248,7 +247,6 @@ function onDocumentKeyDown(evt) {
   }
 }
 
-// SHIFT
 function onDocumentKeyUp(evt) {
   switch (evt.keyCode) {
     case 16:
