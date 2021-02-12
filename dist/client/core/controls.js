@@ -11,8 +11,8 @@ controls.mouseButtons = {
   RIGHT: MOUSE.PAN,
 };
 
-controls.maxDistance = 2500;
-controls.minDistance = 500;
+controls.maxDistance = 2500 * 2;
+controls.minDistance = 900;
 controls.maxPolarAngle = 1.25;
 
 controls.enabled = false;

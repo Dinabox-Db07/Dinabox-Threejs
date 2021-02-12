@@ -7,6 +7,10 @@ import {
   rollOverMesh,
   invPlane,
   grid,
+  // newPlane,
+  // placeHolder,
+  // placePlane,
+  // newPlace,
 } from "./components/objects.js";
 import { controls } from "./core/controls.js";
 import { renderer } from "./core/renderer.js";
@@ -113,7 +117,7 @@ function onDocumentMouseDown(evt) {
     let posZ = point2.position.z;
 
     // geometry
-    const planeGeo = new THREE.PlaneGeometry(posX * 2, posZ * 2);
+    const planeGeo = new THREE.PlaneGeometry(50, 50);
 
     // material
     const planeMat = new THREE.MeshLambertMaterial({
@@ -129,21 +133,25 @@ function onDocumentMouseDown(evt) {
 
     // plane positions
     plane.rotateX(-Math.PI / 2);
-    plane.position.setY(posY);
+    plane.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+    plane.position.set(posX + 25, 25, posZ - 25);
 
     //
     scene.add(plane);
     objects.push(plane);
+
+    // for reset
+    count = 0;
   };
 
   const addLine = () => {
     // line
     const lineGeom = new THREE.Geometry();
-    const line2 = new THREE.Line(
+    const line = new THREE.Line(
       lineGeom,
       new THREE.LineBasicMaterial({ color: "red" })
     );
-    line2.name = "Linha";
+    line.name = "Linha";
 
     // arr scene
     let arr = scene.children;
@@ -164,7 +172,7 @@ function onDocumentMouseDown(evt) {
     }
 
     //
-    scene.add(line2);
+    scene.add(line);
   };
 
   console.log(count);
@@ -173,9 +181,10 @@ function onDocumentMouseDown(evt) {
   if (intersects.length) {
     const intersect = intersects[0];
 
+    console.log(intersects);
     // if statement for deleting object
     if (isShiftDown) {
-      if (intersect.object !== plane) {
+      if (intersect.object !== invPlane) {
         scene.remove(intersect.object);
 
         objects.splice(objects.indexOf(intersect.object), 1);
@@ -198,6 +207,7 @@ function onDocumentMouseDown(evt) {
       count++;
 
       //
+      // console.log(point.position);
     } else if (count >= 1) {
       point2.name = "finalPoint";
 
@@ -216,13 +226,15 @@ function onDocumentMouseDown(evt) {
 
       //
       count++;
+
+      //
+      // console.log(point2.position);
     }
-
-    addLine();
-
     if (count <= -1) {
       count++;
     }
+
+    addLine();
   }
 }
 
