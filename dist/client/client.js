@@ -112,9 +112,9 @@ function onDocumentMouseDown(evt) {
   // complete the line
   const whenCompleteLine = () => {
     // points position
-    let posX = point2.position.x;
-    let posY = point2.position.y;
-    let posZ = point2.position.z;
+    let px = point2.position.x;
+    let py = point2.position.y;
+    let pz = point2.position.z;
 
     // geometry
     const planeGeo = new THREE.PlaneGeometry(50, 50);
@@ -134,9 +134,16 @@ function onDocumentMouseDown(evt) {
     // plane positions
     plane.rotateX(-Math.PI / 2);
     plane.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-    plane.position.set(posX + 25, 25, posZ - 25);
 
-    //
+    let setPos = plane.position.set(px + 25, 25, pz - 25);
+    if (px <= -25) {
+      setPos;
+    } else if (pz <= -25) {
+      setPos;
+    } else {
+      setPos;
+    }
+
     scene.add(plane);
     objects.push(plane);
 
@@ -181,7 +188,6 @@ function onDocumentMouseDown(evt) {
   if (intersects.length) {
     const intersect = intersects[0];
 
-    console.log(intersects);
     // if statement for deleting object
     if (isShiftDown) {
       if (intersect.object !== invPlane) {
@@ -218,6 +224,8 @@ function onDocumentMouseDown(evt) {
       //
       scene.add(point2);
       objects.push(point2);
+
+      console.log(point2.position);
 
       // count for creating the plane
       if (count === 4) {
