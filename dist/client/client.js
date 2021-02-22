@@ -7,10 +7,6 @@ import {
   rollOverMesh,
   invPlane,
   grid,
-  // newPlane,
-  // placeHolder,
-  // placePlane,
-  // newPlace,
 } from "./components/objects.js";
 import { controls } from "./core/controls.js";
 import { renderer } from "./core/renderer.js";
@@ -47,15 +43,15 @@ function init() {
   scene.add(ambientLight, directionalLight);
 
   // mouse listeners
-  window.addEventListener("mousemove", onDocumentMouseMove);
-  window.addEventListener("mousedown", onDocumentMouseDown);
+  window.addEventListener("mousemove", onDocumentMouseMove, false);
+  window.addEventListener("mousedown", onDocumentMouseDown, false);
 
   // key listener
-  window.addEventListener("keydown", onDocumentKeyDown);
-  window.addEventListener("keyup", onDocumentKeyUp);
-  window.addEventListener("keypress", onDocumentKeyPress);
+  window.addEventListener("keydown", onDocumentKeyDown, false);
+  window.addEventListener("keyup", onDocumentKeyUp, false);
+  window.addEventListener("keypress", onDocumentKeyPress, false);
 
-  // window resize
+  /* reajustar tamanho da janela */
   window.addEventListener("resize", onWindowResize, false);
 
   //
@@ -71,7 +67,7 @@ function mouseSetXY(evt) {
   );
 }
 
-// mouse move
+/* função para mover o mouse */
 function onDocumentMouseMove(evt) {
   evt.preventDefault();
   mouseSetXY(evt);
@@ -109,6 +105,22 @@ function onDocumentMouseDown(evt) {
   const point = new THREE.Mesh(sphereGeo, sphereMaterial);
   const point2 = new THREE.Mesh(sphereGeo, sphereMaterial);
 
+  /* função para remover os pontos */
+  function removePoints() {
+    let array = scene.children;
+
+    for (let idx = 0; idx < array.length; idx++) {
+      const elmt = array[idx];
+      if (elmt.name === "firstPoint") {
+        scene.remove(elmt);
+      }
+
+      if (elmt.name === "finalPoint") {
+        scene.remove(elmt);
+      }
+    }
+  }
+
   // complete the line
   const whenCompleteLine = () => {
     // points position
@@ -117,7 +129,7 @@ function onDocumentMouseDown(evt) {
     let pz = point2.position.z;
 
     // geometry
-    const planeGeo = new THREE.PlaneGeometry(50, 50);
+    const planeGeo = new THREE.PlaneGeometry(150, 200);
 
     // material
     const planeMat = new THREE.MeshLambertMaterial({
@@ -135,20 +147,19 @@ function onDocumentMouseDown(evt) {
     plane.rotateX(-Math.PI / 2);
     plane.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
 
-    let setPos = plane.position.set(px + 25, 25, pz - 25);
+    let setPosSmol = plane.position.set(px + 75, 25, pz - 100);
+
     if (px <= -25) {
-      setPos;
-    } else if (pz <= -25) {
-      setPos;
-    } else {
-      setPos;
+      setPosSmol;
     }
 
     scene.add(plane);
     objects.push(plane);
 
-    // for reset
-    count = 0;
+    /* para resetar os pontos */
+    removePoints();
+
+    count = -1;
   };
 
   const addLine = () => {
@@ -182,13 +193,11 @@ function onDocumentMouseDown(evt) {
     scene.add(line);
   };
 
-  console.log(count);
-
-  //
   if (intersects.length) {
     const intersect = intersects[0];
 
-    // if statement for deleting object
+    /* if statement para verificar se o shift
+    está pressionado para deletar o objeto */
     if (isShiftDown) {
       if (intersect.object !== invPlane) {
         scene.remove(intersect.object);
@@ -198,22 +207,25 @@ function onDocumentMouseDown(evt) {
         count--;
       }
 
-      // if statement for creating the first point
-      // else if statement for creating the second point
+      /* else if statement para a criação
+      do primeiro ponto
+
+      else if statement para a criação
+      do segundo ponto já com a linha */
     } else if (count === 0) {
       point.name = "firstPoint";
 
-      //position lock in plane
+      /* Travar a posição do ponto
+      no centro da grade */
       point.position.copy(intersect.point).add(intersect.face.normal);
       point.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
       scene.add(point);
       objects.push(point);
 
-      //
+      /* Adicione +1 no contador */
       count++;
 
       //
-      // console.log(point.position);
     } else if (count >= 1) {
       point2.name = "finalPoint";
 
@@ -236,8 +248,12 @@ function onDocumentMouseDown(evt) {
       count++;
 
       //
-      // console.log(point2.position);
     }
+
+    /*
+    Para prevenir que o contador chegue a -1
+    e impossibilite a pessoa de criar pontos
+    */
     if (count <= -1) {
       count++;
     }
@@ -246,6 +262,7 @@ function onDocumentMouseDown(evt) {
   }
 }
 
+// Activate controls
 function onDocumentKeyPress(evt) {
   switch (evt.keyCode) {
     case 49:
@@ -275,19 +292,21 @@ function onDocumentKeyUp(evt) {
   }
 }
 
-// animate the scene
+// animar a cena
 function animate() {
   requestAnimationFrame(animate);
 
   render();
 }
 
-// render the scene
+// renderizar a cena
 function render() {
   renderer.render(scene, camera);
 }
 
-// resize the camera and scene when window resizes
+/* Ajustar a janela e a câmera
+quando o tamanho da mesma for
+alterado */
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
