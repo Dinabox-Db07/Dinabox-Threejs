@@ -11,7 +11,6 @@ import {
 import { controls } from "./core/controls.js";
 import { renderer } from "./core/renderer.js";
 
-// variables
 let scene,
   count = 0;
 let raycaster,
@@ -19,33 +18,26 @@ let raycaster,
   objects = [],
   isShiftDown = false;
 
-// starting function
+/* Função que inicia tudo */
 function init() {
-  // scene
   scene = new THREE.Scene();
   scene.name = "Projeto Three";
   scene.background = new THREE.Color(0xf0f0f0);
 
-  //grid
   scene.add(grid);
 
-  // raycaster(cursor)
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
   scene.add(rollOverMesh);
 
-  // plane
   scene.add(invPlane);
   objects.push(invPlane);
 
-  // lights
   scene.add(ambientLight, directionalLight);
 
-  // mouse listeners
   window.addEventListener("mousemove", onDocumentMouseMove, false);
   window.addEventListener("mousedown", onDocumentMouseDown, false);
 
-  // key listener
   window.addEventListener("keydown", onDocumentKeyDown, false);
   window.addEventListener("keyup", onDocumentKeyUp, false);
   window.addEventListener("keypress", onDocumentKeyPress, false);
@@ -94,13 +86,10 @@ function onDocumentMouseDown(evt) {
   evt.preventDefault();
   mouseSetXY(evt);
 
-  // raycaster
   raycaster.setFromCamera(mouse, camera);
 
-  // intersect objects
   const intersects = raycaster.intersectObjects(objects);
 
-  // points
   const point = new THREE.Mesh(sphereGeo, sphereMaterial);
   const point2 = point.clone();
 
@@ -121,83 +110,29 @@ function onDocumentMouseDown(evt) {
   }
 
   const whenCompleteLine = () => {
-    /* Primeiro ponto */
-    let posX = point.position.x;
-    let posY = point.position.y;
-    let posZ = point.position.z;
-
-    /* Segundo ponto */
-    let poX = point2.position.x;
-    let poY = point2.position.y;
-    let poZ = point2.position.z;
-
-    /* Geometria customizada */
-
-    let letGeo = new THREE.Geometry();
-    letGeo.vertices.push(
-      new THREE.Vector3(posX, posY, posZ),
-      new THREE.Vector3(posX, posY, posZ),
-      new THREE.Vector3(posX, posY, posZ),
-      new THREE.Vector3(posX, posY, posZ),
-
-      new THREE.Vector3(0, 0, -1),
-      new THREE.Vector3(1, 0, -1),
-      new THREE.Vector3(1, 1, -1),
-      new THREE.Vector3(0, 1, -1)
-    );
-
-    letGeo.faces.push(
-      new THREE.Face3(0, 1, 2),
-      new THREE.Face3(3, 0, 2),
-      new THREE.Face3(4, 5, 6),
-      new THREE.Face3(7, 4, 6),
-
-      new THREE.Face3(0, 4, 1),
-      new THREE.Face3(1, 4, 5),
-      new THREE.Face3(3, 7, 2),
-      new THREE.Face3(2, 7, 6)
-    );
-
-    letGeo.normalize();
-    letGeo.computeVertexNormals();
-
-    const GeoForm = new THREE.Mesh(
-      letGeo,
-      new THREE.MeshNormalMaterial({ side: THREE.DoubleSide })
-    );
-
-    GeoForm.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-    letGeo.scale(50, 50, 10);
-    scene.add(GeoForm);
-    /***/
-
-    removePoints();
-    count = 0;
-  };
-
-  // complete the line
-  const whenCompleteLine2 = () => {
-    // points position
     let px = point2.position.x;
     let py = point2.position.y;
     let pz = point2.position.z;
 
-    // geometry
-    const planeGeo = new THREE.PlaneGeometry(150, 150);
+    /* */
+    let planeSize = Math.ceil(point.position.distanceTo(point2.position) / 2);
 
-    // material
+    /* Geometry */
+    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+
+    /* Material */
     const planeMat = new THREE.MeshLambertMaterial({
       color: "green",
       side: THREE.DoubleSide,
     });
 
-    // mesh
+    /* Mesh */
     const plane = new THREE.Mesh(planeGeo, planeMat);
 
-    // name
-    plane.name = "Plane";
+    /* Name */
+    plane.name = "Completed plane";
 
-    // plane positions
+    /* Plane positions */
     plane.rotateX(-Math.PI / 2);
     plane.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
 
@@ -292,7 +227,7 @@ function onDocumentMouseDown(evt) {
       objects.push(point2);
 
       console.log(point2.position);
-      console.log(Math.ceil(point.position.distanceTo(point2.position)));
+      console.log(Math.ceil(point.position.distanceTo(point2.position) / 2));
 
       // count for creating the plane
       if (count === 4) {
