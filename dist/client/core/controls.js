@@ -1,5 +1,5 @@
-import { MOUSE } from "../components/three/build/three.module.js";
-import { OrbitControls } from "../components/three/examples/jsm/controls/OrbitControls.js";
+import { MOUSE } from "./three/build/three.module.js";
+import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
 import { camera } from "./mainCamera.js";
 import { renderer } from "./renderer.js";
 
@@ -11,8 +11,8 @@ controls.mouseButtons = {
   RIGHT: MOUSE.PAN,
 };
 
-controls.maxDistance = 2500 * 2;
-controls.minDistance = 900;
+controls.maxDistance = 5000;
+controls.minDistance = 50;
 controls.maxPolarAngle = 1.25;
 
 controls.enabled = false;

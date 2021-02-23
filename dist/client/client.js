@@ -1,4 +1,4 @@
-import * as THREE from "./components/three/build/three.module.js";
+import * as THREE from "./core/three/build/three.module.js";
 import { camera } from "./core/mainCamera.js";
 import { directionalLight, ambientLight } from "./core/sceneLights.js";
 import {
@@ -13,7 +13,6 @@ import { renderer } from "./core/renderer.js";
 
 // variables
 let scene,
-  plane,
   count = 0;
 let raycaster,
   mouse,
@@ -103,7 +102,7 @@ function onDocumentMouseDown(evt) {
 
   // points
   const point = new THREE.Mesh(sphereGeo, sphereMaterial);
-  const point2 = new THREE.Mesh(sphereGeo, sphereMaterial);
+  const point2 = point.clone();
 
   /* função para remover os pontos */
   function removePoints() {
@@ -121,15 +120,70 @@ function onDocumentMouseDown(evt) {
     }
   }
 
-  // complete the line
   const whenCompleteLine = () => {
+    /* Primeiro ponto */
+    let posX = point.position.x;
+    let posY = point.position.y;
+    let posZ = point.position.z;
+
+    /* Segundo ponto */
+    let poX = point2.position.x;
+    let poY = point2.position.y;
+    let poZ = point2.position.z;
+
+    /* Geometria customizada */
+
+    let letGeo = new THREE.Geometry();
+    letGeo.vertices.push(
+      new THREE.Vector3(posX, posY, posZ),
+      new THREE.Vector3(posX, posY, posZ),
+      new THREE.Vector3(posX, posY, posZ),
+      new THREE.Vector3(posX, posY, posZ),
+
+      new THREE.Vector3(0, 0, -1),
+      new THREE.Vector3(1, 0, -1),
+      new THREE.Vector3(1, 1, -1),
+      new THREE.Vector3(0, 1, -1)
+    );
+
+    letGeo.faces.push(
+      new THREE.Face3(0, 1, 2),
+      new THREE.Face3(3, 0, 2),
+      new THREE.Face3(4, 5, 6),
+      new THREE.Face3(7, 4, 6),
+
+      new THREE.Face3(0, 4, 1),
+      new THREE.Face3(1, 4, 5),
+      new THREE.Face3(3, 7, 2),
+      new THREE.Face3(2, 7, 6)
+    );
+
+    letGeo.normalize();
+    letGeo.computeVertexNormals();
+
+    const GeoForm = new THREE.Mesh(
+      letGeo,
+      new THREE.MeshNormalMaterial({ side: THREE.DoubleSide })
+    );
+
+    GeoForm.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+    letGeo.scale(50, 50, 10);
+    scene.add(GeoForm);
+    /***/
+
+    removePoints();
+    count = 0;
+  };
+
+  // complete the line
+  const whenCompleteLine2 = () => {
     // points position
     let px = point2.position.x;
     let py = point2.position.y;
     let pz = point2.position.z;
 
     // geometry
-    const planeGeo = new THREE.PlaneGeometry(150, 200);
+    const planeGeo = new THREE.PlaneGeometry(150, 150);
 
     // material
     const planeMat = new THREE.MeshLambertMaterial({
@@ -147,7 +201,7 @@ function onDocumentMouseDown(evt) {
     plane.rotateX(-Math.PI / 2);
     plane.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
 
-    let setPosSmol = plane.position.set(px + 75, 25, pz - 100);
+    let setPosSmol = plane.position.set(px + 75, 25, pz - 75);
 
     if (px <= -25) {
       setPosSmol;
@@ -238,6 +292,7 @@ function onDocumentMouseDown(evt) {
       objects.push(point2);
 
       console.log(point2.position);
+      console.log(Math.ceil(point.position.distanceTo(point2.position)));
 
       // count for creating the plane
       if (count === 4) {

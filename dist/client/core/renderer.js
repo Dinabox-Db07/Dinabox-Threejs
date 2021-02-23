@@ -1,4 +1,4 @@
-import { WebGLRenderer } from "../components/three/build/three.module.js";
+import { WebGLRenderer } from "./three/build/three.module.js";
 
 export const renderer = new WebGLRenderer({
   antialias: true,

@@ -1,4 +1,4 @@
-import { PerspectiveCamera } from "./three/build/three.module.js";
+import { PerspectiveCamera } from "../core/three/build/three.module.js";
 export const camera = new PerspectiveCamera(
   45,
   window.innerWidth / window.innerHeight,

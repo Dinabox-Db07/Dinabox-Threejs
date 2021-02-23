@@ -1,7 +1,7 @@
 import {
   AmbientLight,
   DirectionalLight,
-} from "../components/three/build/three.module.js";
+} from "./three/build/three.module.js";
 
 export const ambientLight = new AmbientLight(0x606060);
 

@@ -6,7 +6,7 @@ import {
   SphereBufferGeometry,
   DoubleSide,
   GridHelper,
-} from "./three/build/three.module.js";
+} from "../core/three/build/three.module.js";
 
 // invPlane
 const geometry = new PlaneGeometry(1000 * 2, 1000 * 2);
