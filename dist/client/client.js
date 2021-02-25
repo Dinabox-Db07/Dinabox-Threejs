@@ -86,36 +86,64 @@ function onDocumentMouseDown(evt) {
   const intersects = raycaster.intersectObjects(objects);
 
   const point = new THREE.Mesh(sphereGeo, sphereMaterial);
-  const point2 = point.clone();
+
+  const removePoints = () => {
+    let arr = scene.children;
+
+    for (let idx = 0; idx < arr.length; idx++) {
+      const elmt = arr[idx];
+
+      if (elmt.name === "Ponto Dois") {
+        scene.remove(elmt);
+      }
+    }
+    count = 0;
+  };
 
   const whenCompleteLine = () => {
-    let px = point2.position.x;
-    let pz = point2.position.z;
+    let px = point.position.x;
+    let py = point.position.y;
+    let pz = point.position.z;
 
-    const planeGeo = new THREE.PlaneGeometry(150, 150);
+    const IShape = new THREE.Shape();
 
-    const planeMat = new THREE.MeshLambertMaterial({
-      color: "green",
-      side: THREE.DoubleSide,
-    });
+    IShape.lineTo(py, pz);
 
-    const plane = new THREE.Mesh(planeGeo, planeMat);
+    const extrudeSettings = {
+      depth: 1,
+      bevelEnabled: true,
+      bevelSegments: 1,
+      steps: 1,
+      bevelSize: 1,
+      bevelThickness: 1,
+    };
 
-    plane.name = "Completed plane";
+    const shapeGeo = new THREE.ExtrudeGeometry(IShape, extrudeSettings);
 
-    plane.rotateX(-Math.PI / 2);
-    plane.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+    const shape = new THREE.Mesh(
+      shapeGeo,
+      new THREE.MeshPhongMaterial({ color: "green" })
+    );
 
-    let setPosSmol = plane.position.set(px + 75, 25, pz - 75);
+    let arr = scene.children;
+    for (let i = 1; i < arr.length; i++) {
+      const element = arr[i];
 
-    if (px <= -25) {
-      setPosSmol;
+      if (element.name === "Ponto Dois") {
+        shapeGeo.vertices.push(element.position);
+      }
     }
 
-    scene.add(plane);
-    objects.push(plane);
+    scene.add(shape);
+    objects.push(shape);
 
-    count = -1;
+    shape.rotateX(Math.PI / 2);
+    shape.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+    shape.position.set(px, 25, pz);
+
+    // removePoints();
+
+    // count = -1;
   };
 
   const addLine = () => {
@@ -130,15 +158,7 @@ function onDocumentMouseDown(evt) {
     for (let i = 1; i < arr.length; i++) {
       const element = arr[i];
 
-      if (element.name === "Ponto Um") {
-        lineGeom.vertices.push(element.position);
-      }
-
       if (element.name === "Ponto Dois") {
-        lineGeom.vertices.push(element.position);
-      }
-
-      if (element.name === "Ponto Final") {
         lineGeom.vertices.push(element.position);
       }
     }
@@ -157,29 +177,20 @@ function onDocumentMouseDown(evt) {
 
         count--;
       }
-    } else if (count === 0) {
-      point.name = "Ponto Um";
+    } else if (count >= 0) {
+      point.name = "Ponto Dois";
 
       point.position.copy(intersect.point).add(intersect.face.normal);
       point.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
       scene.add(point);
       objects.push(point);
-
-      count++;
-    } else if (count >= 1) {
-      point2.name = "Ponto Dois";
-
-      point2.position.copy(intersect.point).add(intersect.face.normal);
-      point2.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-      scene.add(point2);
-      objects.push(point2);
-
-      count++;
-    }
-
-    if (count === 5) {
       whenCompleteLine();
+
+      count++;
     }
+
+    console.log(point.position);
+    console.log(scene);
 
     if (count <= -1) {
       count++;
