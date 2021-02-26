@@ -1,4 +1,5 @@
 import * as THREE from "./core/three/build/three.module.js";
+import * as dat from "./core/dat.gui/build/dat.gui.module.js";
 import { WEBGL } from "./core/three/examples/jsm/WebGL.js";
 import { camera } from "./core/mainCamera.js";
 import { directionalLight, ambientLight } from "./core/sceneLights.js";
@@ -18,6 +19,16 @@ let raycaster,
   mouse,
   objects = [],
   isShiftDown = false;
+
+const extrudeSettings = {
+  steps: 2,
+  depth: 16,
+  bevelEnabled: true,
+  bevelThickness: 1,
+  bevelSize: 1,
+  bevelOffset: 0,
+  bevelSegments: 1,
+};
 
 function init() {
   scene = new THREE.Scene();
@@ -105,45 +116,27 @@ function onDocumentMouseDown(evt) {
     let py = point.position.y;
     let pz = point.position.z;
 
-    const IShape = new THREE.Shape();
+    const l = 150,
+      w = 150;
 
-    IShape.lineTo(py, pz);
+    const geometry = new THREE.PlaneBufferGeometry(l, w);
 
-    const extrudeSettings = {
-      depth: 1,
-      bevelEnabled: true,
-      bevelSegments: 1,
-      steps: 1,
-      bevelSize: 1,
-      bevelThickness: 1,
-    };
+    const material = new THREE.MeshLambertMaterial({
+      color: 0x00ff00,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
 
-    const shapeGeo = new THREE.ExtrudeGeometry(IShape, extrudeSettings);
+    scene.add(mesh);
+    objects.push(mesh);
 
-    const shape = new THREE.Mesh(
-      shapeGeo,
-      new THREE.MeshPhongMaterial({ color: "green" })
-    );
+    mesh.rotateX(Math.PI / 2);
+    mesh.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+    mesh.position.set(px + 75, 25, pz - 75);
 
-    let arr = scene.children;
-    for (let i = 1; i < arr.length; i++) {
-      const element = arr[i];
+    removePoints();
 
-      if (element.name === "Ponto Dois") {
-        shapeGeo.vertices.push(element.position);
-      }
-    }
-
-    scene.add(shape);
-    objects.push(shape);
-
-    shape.rotateX(Math.PI / 2);
-    shape.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
-    shape.position.set(px, 25, pz);
-
-    // removePoints();
-
-    // count = -1;
+    count = -1;
   };
 
   const addLine = () => {
@@ -184,13 +177,16 @@ function onDocumentMouseDown(evt) {
       point.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
       scene.add(point);
       objects.push(point);
-      whenCompleteLine();
 
       count++;
     }
 
     console.log(point.position);
     console.log(scene);
+
+    if (count === 6) {
+      whenCompleteLine();
+    }
 
     if (count <= -1) {
       count++;
