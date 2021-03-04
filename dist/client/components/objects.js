@@ -1,21 +1,22 @@
 import {
   Mesh,
-  PlaneGeometry,
+  CylinderGeometry,
   MeshBasicMaterial,
   MeshLambertMaterial,
   SphereBufferGeometry,
   DoubleSide,
-  GridHelper,
 } from "../core/three/build/three.module.js";
 
-const geometry = new PlaneGeometry(1000, 1000);
-geometry.rotateX(-Math.PI / 2);
+const geometry = new CylinderGeometry(2147483647, 0, 1, 128);
+
 export const invPlane = new Mesh(
   geometry,
-  new MeshBasicMaterial({ visible: false, side: DoubleSide })
+  new MeshBasicMaterial({
+    color: 0xaaaaaa,
+    transparent: true,
+    opacity: 0.1,
+  })
 );
-
-export const grid = new GridHelper(1000, 20, 0x666666, 0x999999);
 
 const rollOverGeo = new SphereBufferGeometry(8, 32, 32);
 const rollOverMaterial = new MeshBasicMaterial({
@@ -26,7 +27,7 @@ const rollOverMaterial = new MeshBasicMaterial({
 
 export const rollOverMesh = new Mesh(rollOverGeo, rollOverMaterial);
 
-export const sphereGeo = new SphereBufferGeometry(8, 32, 32);
+export const sphereGeo = new SphereBufferGeometry(4, 32, 32);
 export const sphereMaterial = new MeshLambertMaterial({
   color: "yellow",
   side: DoubleSide,
