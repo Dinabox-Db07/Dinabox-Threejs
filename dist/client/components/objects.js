@@ -1,24 +1,26 @@
 import {
   Mesh,
-  CylinderGeometry,
+  CircleGeometry,
   MeshBasicMaterial,
   MeshLambertMaterial,
   SphereBufferGeometry,
   DoubleSide,
 } from "../core/three/build/three.module.js";
 
-const geometry = new CylinderGeometry(2147483647, 0, 1, 128);
+const geometry = new CircleGeometry(2147483647, 128);
+geometry.rotateX(Math.PI / 2);
 
 export const invPlane = new Mesh(
   geometry,
   new MeshBasicMaterial({
     color: 0xaaaaaa,
+    side: DoubleSide,
     transparent: true,
     opacity: 0.1,
   })
 );
 
-const rollOverGeo = new SphereBufferGeometry(8, 32, 32);
+const rollOverGeo = new SphereBufferGeometry(4, 32, 32);
 const rollOverMaterial = new MeshBasicMaterial({
   color: 0xff0000,
   opacity: 0.45,

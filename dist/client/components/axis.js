@@ -14,17 +14,17 @@ const blue = new LineBasicMaterial({ color: 0x0000ff });
 const redDashed = new LineDashedMaterial({
   color: 0xff0000,
   dashSize: 3,
-  gapSize: 6,
+  gapSize: 4,
 });
 const greenDashed = new LineDashedMaterial({
   color: 0x00ff00,
   dashSize: 3,
-  gapSize: 6,
+  gapSize: 4,
 });
 const blueDashed = new LineDashedMaterial({
   color: 0x0000ff,
   dashSize: 3,
-  gapSize: 6,
+  gapSize: 4,
 });
 
 const XPoints = [];

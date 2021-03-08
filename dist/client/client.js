@@ -1,5 +1,5 @@
 import * as THREE from "./core/three/build/three.module.js";
-import { camera } from "./core/mainCamera.js";
+import Stats from "./core/stats.js/src/Stats.js";
 import { directionalLight, ambientLight } from "./core/sceneLights.js";
 import {
   sphereGeo,
@@ -15,6 +15,7 @@ import {
   IYAxis,
   IZAxis,
 } from "./components/axis.js";
+import { camera } from "./core/mainCamera.js";
 import { controls } from "./core/controls.js";
 import { renderer } from "./core/renderer.js";
 
@@ -23,7 +24,10 @@ let scene,
 let raycaster,
   mouse,
   objects = [],
-  isShiftDown = false;
+  controlPoints = [],
+  group = new THREE.Group(),
+  shape,
+  stats = new Stats();
 
 init();
 animate();
@@ -33,21 +37,30 @@ function init() {
   scene.name = "Projeto Three";
   scene.background = new THREE.Color(0xf0f8ff);
 
-  scene.add(XAxis, YAxis, ZAxis, IXAxis, IYAxis, IZAxis);
+  stats.showPanel(0);
+  document.getElementById("status").appendChild(stats.dom);
 
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
-  scene.add(rollOverMesh);
 
-  scene.add(invPlane);
+  group.add(
+    ambientLight,
+    directionalLight,
+    XAxis,
+    YAxis,
+    ZAxis,
+    IXAxis,
+    IYAxis,
+    IZAxis,
+    rollOverMesh,
+    invPlane
+  );
+
   objects.push(invPlane);
-
-  scene.add(ambientLight, directionalLight);
+  scene.add(group);
 
   document.addEventListener("mousemove", onDocumentMouseMove, false);
   document.addEventListener("mousedown", onDocumentMouseDown, false);
-  document.addEventListener("keydown", onDocumentKeyDown, false);
-  document.addEventListener("keyup", onDocumentKeyUp, false);
   document.addEventListener("keypress", onDocumentKeyPress, false);
 
   window.addEventListener("resize", onWindowResize, false);
@@ -75,14 +88,7 @@ function onDocumentMouseMove(evt) {
   if (intersects.length > 0) {
     const intersect = intersects[0];
     rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
-    rollOverMesh.position
-      .divideScalar(50)
-      .floor()
-      .multiplyScalar(50)
-      .addScalar(0);
   }
-
-  render();
 }
 
 function onDocumentMouseDown(evt) {
@@ -92,7 +98,6 @@ function onDocumentMouseDown(evt) {
   raycaster.setFromCamera(mouse, camera);
 
   const intersects = raycaster.intersectObjects(objects);
-
   const point = new THREE.Mesh(sphereGeo, sphereMaterial);
 
   const removePoints = () => {
@@ -105,32 +110,6 @@ function onDocumentMouseDown(evt) {
         scene.remove(elmt);
       }
     }
-
-    count = 0;
-  };
-
-  const whenCompleteLine = () => {
-    let px = point.position.x;
-    let pz = point.position.z;
-
-    const l = 150,
-      w = 150;
-
-    const geometry = new THREE.BoxBufferGeometry(l, 1, w);
-
-    const material = new THREE.MeshLambertMaterial({
-      color: 0x00ff00,
-      side: THREE.DoubleSide,
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-
-    scene.add(mesh);
-    objects.push(mesh);
-
-    mesh.position.divideScalar(50).floor().multiplyScalar(50).addScalar(0);
-    mesh.position.set(px + 75, 0, pz - 75);
-
-    removePoints();
 
     count = 0;
   };
@@ -155,33 +134,45 @@ function onDocumentMouseDown(evt) {
     scene.add(line);
   };
 
-  if (intersects.length) {
-    const intersect = intersects[0];
+  if (intersects.length > 0) {
+    if (count <= 5) {
+      controlPoints[count] = intersects[0].point.clone();
 
-    if (isShiftDown) {
-      if (intersect.object !== invPlane) {
-        scene.remove(intersect.object);
+      point.position.copy(intersects[0].point);
 
-        objects.splice(objects.indexOf(intersect.object), 1);
-
-        count--;
-      }
-    } else if (count >= 0) {
+      scene.add(point);
       point.name = "Ponto Dois";
 
-      point.position.copy(intersect.point).add(intersect.face.normal);
-      point.position.divideScalar(50).floor().multiplyScalar(50).addScalar(0);
-      scene.add(point);
-      objects.push(point);
-
       count++;
-    }
+    } else {
+      shape = new THREE.Shape();
+      shape.moveTo(controlPoints[0].x, -controlPoints[0].z);
+      shape.lineTo(controlPoints[1].x, -controlPoints[1].z);
+      shape.lineTo(controlPoints[2].x, -controlPoints[2].z);
+      shape.lineTo(controlPoints[3].x, -controlPoints[3].z);
+      shape.lineTo(controlPoints[0].x, -controlPoints[0].z);
 
-    console.log(point.position);
+      let extrudeSettings = {
+        steps: 0,
+        depth: 0,
+        bevelEnabled: false,
+      };
+      let extrudeGeom = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+      extrudeGeom.rotateX(-Math.PI / 2);
+      let wall = new THREE.Mesh(
+        extrudeGeom,
+        new THREE.MeshLambertMaterial({
+          color: "green",
+          side: THREE.DoubleSide,
+        })
+      );
 
-    if (count === 6) {
-      whenCompleteLine();
-      // removePoints();
+      scene.add(wall);
+      wall.position.setY(0);
+
+      controlPoints = [];
+      removePoints();
+      count = 0;
     }
 
     if (count <= -1) {
@@ -204,24 +195,10 @@ function onDocumentKeyPress(evt) {
   }
 }
 
-function onDocumentKeyDown(evt) {
-  switch (evt.keyCode) {
-    case 16:
-      isShiftDown = true;
-      break;
-  }
-}
-
-function onDocumentKeyUp(evt) {
-  switch (evt.keyCode) {
-    case 16:
-      isShiftDown = false;
-      break;
-  }
-}
-
 function animate() {
   requestAnimationFrame(animate);
+  stats.begin();
+  stats.end();
 
   render();
 }

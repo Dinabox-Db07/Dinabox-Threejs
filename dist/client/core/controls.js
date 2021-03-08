@@ -5,13 +5,14 @@ import { renderer } from "./renderer.js";
 
 export const controls = new OrbitControls(camera, renderer.domElement);
 controls.mouseButtons = {
-  LEFT: null,
+  LEFT: MOUSE.PAN,
   MIDDLE: MOUSE.ROTATE,
-  RIGHT: MOUSE.PAN,
+  RIGHT: MOUSE.DOLLY,
 };
 
 controls.maxDistance = 5000;
 controls.minDistance = 50;
-controls.maxPolarAngle = 1.25;
+controls.minPolarAngle = 0.1;
+controls.maxPolarAngle = 1.4;
 
-controls.enabled = false;
+controls.enabled = true;
