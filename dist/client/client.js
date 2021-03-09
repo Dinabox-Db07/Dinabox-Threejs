@@ -1,12 +1,7 @@
 import * as THREE from "./core/three/build/three.module.js";
 import Stats from "./core/stats.js/src/Stats.js";
 import { directionalLight, ambientLight } from "./core/sceneLights.js";
-import {
-  sphereGeo,
-  sphereMaterial,
-  rollOverMesh,
-  invPlane,
-} from "./components/objects.js";
+import { sphereGeo, sphereMaterial, invPlane } from "./components/objects.js";
 import {
   XAxis,
   YAxis,
@@ -23,10 +18,11 @@ let scene,
   count = 0;
 let raycaster,
   mouse,
+  shape,
+  INTERSECTED,
   objects = [],
   controlPoints = [],
   group = new THREE.Group(),
-  shape,
   stats = new Stats();
 
 init();
@@ -52,7 +48,6 @@ function init() {
     IXAxis,
     IYAxis,
     IZAxis,
-    rollOverMesh,
     invPlane
   );
 
@@ -70,6 +65,40 @@ function init() {
   );
 }
 
+const addLine = () => {
+  const lineGeom = new THREE.Geometry();
+  const line = new THREE.Line(
+    lineGeom,
+    new THREE.LineBasicMaterial({ color: "black" })
+  );
+  line.name = "Linha";
+
+  let arr = scene.children;
+  for (let i = 1; i < arr.length; i++) {
+    const element = arr[i];
+
+    if (element.name === "Ponto Dois") {
+      lineGeom.vertices.push(element.position);
+    }
+  }
+
+  scene.add(line);
+};
+
+const removePoints = () => {
+  let arr = scene.children;
+
+  for (let idx = 0; idx < arr.length; idx++) {
+    const elmt = arr[idx];
+
+    if (elmt.name === "Ponto Dois") {
+      scene.remove(elmt);
+    }
+  }
+
+  count = 0;
+};
+
 function mouseSetXY(evt) {
   mouse.set(
     (evt.clientX / window.innerWidth) * 2 - 1,
@@ -83,11 +112,22 @@ function onDocumentMouseMove(evt) {
 
   raycaster.setFromCamera(mouse, camera);
 
-  const intersects = raycaster.intersectObjects(objects);
+  const intersects = raycaster.intersectObjects(scene.children);
 
   if (intersects.length > 0) {
-    const intersect = intersects[0];
-    rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
+    if (INTERSECTED != intersects[0].object) {
+      if (INTERSECTED)
+        INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+      INTERSECTED = intersects[0].object;
+      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+      INTERSECTED.material.emissive.setHex(0xff0000);
+    }
+  } else {
+    if (INTERSECTED)
+      INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+    INTERSECTED = null;
   }
 }
 
@@ -99,40 +139,6 @@ function onDocumentMouseDown(evt) {
 
   const intersects = raycaster.intersectObjects(objects);
   const point = new THREE.Mesh(sphereGeo, sphereMaterial);
-
-  const removePoints = () => {
-    let arr = scene.children;
-
-    for (let idx = 0; idx < arr.length; idx++) {
-      const elmt = arr[idx];
-
-      if (elmt.name === "Ponto Dois") {
-        scene.remove(elmt);
-      }
-    }
-
-    count = 0;
-  };
-
-  const addLine = () => {
-    const lineGeom = new THREE.Geometry();
-    const line = new THREE.Line(
-      lineGeom,
-      new THREE.LineBasicMaterial({ color: "black" })
-    );
-    line.name = "Linha";
-
-    let arr = scene.children;
-    for (let i = 1; i < arr.length; i++) {
-      const element = arr[i];
-
-      if (element.name === "Ponto Dois") {
-        lineGeom.vertices.push(element.position);
-      }
-    }
-
-    scene.add(line);
-  };
 
   if (intersects.length > 0) {
     if (count <= 5) {
@@ -159,7 +165,7 @@ function onDocumentMouseDown(evt) {
       };
       let extrudeGeom = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
       extrudeGeom.rotateX(-Math.PI / 2);
-      let wall = new THREE.Mesh(
+      let form = new THREE.Mesh(
         extrudeGeom,
         new THREE.MeshLambertMaterial({
           color: "green",
@@ -167,8 +173,8 @@ function onDocumentMouseDown(evt) {
         })
       );
 
-      scene.add(wall);
-      wall.position.setY(0);
+      scene.add(form);
+      form.position.setY(0);
 
       controlPoints = [];
       removePoints();
@@ -191,6 +197,10 @@ function onDocumentKeyPress(evt) {
 
     case 50:
       controls.enabled = true;
+      break;
+
+    case 51:
+      console.log(scene.children[0].children);
       break;
   }
 }
