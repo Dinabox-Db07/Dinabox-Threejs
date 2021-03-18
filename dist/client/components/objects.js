@@ -20,6 +20,16 @@ export const invPlane = new Mesh(
   })
 );
 
+export const inv = new Mesh(
+  new CircleGeometry(2147483647, 128),
+  new MeshBasicMaterial({
+    color: 0xaaaaaa,
+    side: DoubleSide,
+    opacity: 0.1,
+    transparent: true,
+  })
+);
+
 const rollOverGeo = new SphereBufferGeometry(4, 32, 32);
 const rollOverMaterial = new MeshBasicMaterial({
   color: 0xff0000,

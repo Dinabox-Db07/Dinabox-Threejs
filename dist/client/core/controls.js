@@ -10,7 +10,7 @@ controls.mouseButtons = {
   RIGHT: MOUSE.DOLLY,
 };
 
-controls.maxDistance = 5000;
+controls.maxDistance = 12000;
 controls.minDistance = 50;
 controls.minPolarAngle = 0.1;
 controls.maxPolarAngle = 1.4;

@@ -1,7 +1,12 @@
 import * as THREE from "./core/three/build/three.module.js";
 import Stats from "./core/stats.js/src/Stats.js";
 import { directionalLight, ambientLight } from "./core/sceneLights.js";
-import { sphereGeo, sphereMaterial, invPlane } from "./components/objects.js";
+import {
+  inv,
+  sphereGeo,
+  sphereMaterial,
+  invPlane,
+} from "./components/objects.js";
 import {
   XAxis,
   YAxis,
@@ -49,6 +54,7 @@ function init() {
     IYAxis,
     IZAxis,
     invPlane
+    // inv
   );
 
   objects.push(invPlane);
@@ -67,10 +73,12 @@ function init() {
 
 const addLine = () => {
   const lineGeom = new THREE.Geometry();
-  const line = new THREE.Line(
-    lineGeom,
-    new THREE.LineBasicMaterial({ color: "black" })
-  );
+
+  const lineMate = new THREE.LineBasicMaterial({
+    color: "black",
+  });
+
+  const line = new THREE.Line(lineGeom, lineMate);
   line.name = "Linha";
 
   let arr = scene.children;
@@ -106,29 +114,56 @@ function mouseSetXY(evt) {
   );
 }
 
+function findIntersection() {
+  raycaster.setFromCamera(mouse, camera);
+
+  let intersects = raycaster.intersectObjects(scene.children),
+    material;
+
+  if (intersects.length > 0) {
+    if (INTERSECTED != intersects[0].object) {
+      if (INTERSECTED) {
+        material = INTERSECTED.material;
+
+        if (material.emissive) {
+          material.emissive.setHex(INTERSECTED.currentHex);
+        } else {
+          material.color.setHex(INTERSECTED.currentHex);
+        }
+      }
+
+      INTERSECTED = intersects[0].object;
+      material = INTERSECTED.material;
+
+      if (material.emissive) {
+        INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+        material.emissive.setHex(0xff0000);
+      } else {
+        INTERSECTED.currentHex = material.color.getHex();
+        material.color.setHex(0xff0000);
+      }
+    }
+  } else {
+    if (INTERSECTED) {
+      material = INTERSECTED.material;
+
+      if (material.emissive) {
+        material.emissive.setHex(INTERSECTED.currentHex);
+      } else {
+        material.color.setHex(INTERSECTED.currentHex);
+      }
+    }
+
+    INTERSECTED = null;
+  }
+}
+
 function onDocumentMouseMove(evt) {
   evt.preventDefault();
   mouseSetXY(evt);
 
   raycaster.setFromCamera(mouse, camera);
-
-  const intersects = raycaster.intersectObjects(scene.children);
-
-  if (intersects.length > 0) {
-    if (INTERSECTED != intersects[0].object) {
-      if (INTERSECTED)
-        INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-
-      INTERSECTED = intersects[0].object;
-      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-      INTERSECTED.material.emissive.setHex(0xff0000);
-    }
-  } else {
-    if (INTERSECTED)
-      INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-
-    INTERSECTED = null;
-  }
+  findIntersection();
 }
 
 function onDocumentMouseDown(evt) {
@@ -163,8 +198,10 @@ function onDocumentMouseDown(evt) {
         depth: 0,
         bevelEnabled: false,
       };
+
       let extrudeGeom = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
       extrudeGeom.rotateX(-Math.PI / 2);
+
       let form = new THREE.Mesh(
         extrudeGeom,
         new THREE.MeshLambertMaterial({
